@@ -1,6 +1,18 @@
 import requests, json
 
 def emotion_detector(text_to_analyze: str) -> dict:
+    # Check for blank input
+    if not text_to_analyze.strip():
+        return {
+            'anger': None,
+            'disgust': None,
+            'fear': None,
+            'joy': None,
+            'sadness': None,
+            'dominant_emotion': None
+        }
+
+
     URL = 'https://sn-watson-emotion.labs.skills.network/v1/watson.runtime.nlp.v1/NlpService/EmotionPredict'
     myobj = { "raw_document": { "text": text_to_analyze } }
     header = {"grpc-metadata-mm-model-id": "emotion_aggregated-workflow_lang_en_stock"}
@@ -15,12 +27,23 @@ def emotion_detector(text_to_analyze: str) -> dict:
 
     # Compare all the scores with each other
     # Make a new dictionary with the highest score appended to it. 
-    highest_score = 0
-    for emotion in emotions: 
-        if emotions[emotion] > highest_score:
-            highest_score = emotions[emotion]
-            highest_emotion = emotion
-        
-    emotions['dominant_emotion'] = highest_emotion
+    if response.status_code == 200:
+        highest_score = 0
+        for emotion in emotions: 
+            if emotions[emotion] > highest_score:
+                highest_score = emotions[emotion]
+                highest_emotion = emotion
+            
+        emotions['dominant_emotion'] = highest_emotion
+    
+    elif response.status_code == 400:
+        return {
+            'anger': None,
+            'disgust': None,
+            'fear': None,
+            'joy': None,
+            'sadness': None,
+            'dominant_emotion': None
+        }
 
     return emotions
