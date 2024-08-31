@@ -11,7 +11,16 @@ def emotion_detector(text_to_analyze: str) -> dict:
      # Parse the response from the API
     formatted_response = json.loads(response.text)
 
-    # Return the label and score in a dictionary
-    return formatted_response['emotionPredictions']
+    emotions: dict[str, float] = formatted_response['emotionPredictions'][0]['emotion']
 
-print("Hello")
+    # Compare all the scores with each other
+    # Make a new dictionary with the highest score appended to it. 
+    highest_score = 0
+    for emotion in emotions: 
+        if emotions[emotion] > highest_score:
+            highest_score = emotions[emotion]
+            highest_emotion = emotion
+        
+    emotions['dominant_emotion'] = highest_emotion
+
+    return emotions
